@@ -23,14 +23,6 @@ REM 0: no runners, 1, 2, 3: one runner on 1st 2nd 3rd
 REM 13: runners on 1st and 3rd, 23: runners un 2nd and 3rd etc.
 DIM SHARED Team$(2): REM team names
 DIM SHARED Inning, Frame, Outs AS INTEGER
-REM Populate play array
-FOR i = 1 TO 21
-  READ P(i)
-NEXT
-FOR i = 1 TO 21
-  READ P$(i)
-NEXT
-PRINT "*** PLAY BALL! ***": PRINT
 CALL Setup
 REM Main loop
 DO WHILE i$ <> "Q"
@@ -359,6 +351,14 @@ SUB Setup
   H(TOP) = 0: H(BOTTOM) = 0
   E(TOP) = 0: E(BOTTOM) = 0
   Inning = 0: Frame = BOTTOM
+  REM Populate play array
+  FOR i = 1 TO 21
+    READ P(i)
+  NEXT
+  FOR i = 1 TO 21
+    READ P$(i)
+  NEXT
+  PRINT "*** PLAY BALL! ***": PRINT
   CALL NewFrame
 END SUB
 
