@@ -10,7 +10,7 @@ DECLARE SUB PlayBall (R AS INTEGER)
 DECLARE FUNCTION Fetch$ (R AS INTEGER)
 DECLARE FUNCTION Roll% ()
 REM Dice Baseball
-REM VER 0.1
+REM VER 1.0
 DEFINT A-Z
 RANDOMIZE -TIMER: CLS
 DIM SHARED P%(21), P$(21): REM Play number and name
@@ -31,8 +31,8 @@ DO WHILE i$ <> "Q"
   DO WHILE i$ = ""
     i$ = UCASE$(INKEY$)
   LOOP
-  R = Roll
-  CALL PlayBall(R)
+  R1 = Roll
+  CALL PlayBall(R1)
   CALL After
   CALL BoxScore
 LOOP
@@ -60,12 +60,12 @@ SUB AddRun (Runs AS INTEGER)
 END SUB
 
 SUB Advance (hit)
-  R = 0
+  R1 = 0
   SELECT CASE OnBase
     CASE 0: REM No runners on base
       OnBase = hit
       IF hit = 4 THEN
-        R = 1: REM One HR
+        R1 = 1: REM One HR
         OnBase = 0
       END IF
    
@@ -79,10 +79,10 @@ SUB Advance (hit)
          OnBase = 13
        CASE 3: REM Triple
          OnBase = 3
-         R = 1
+         R1 = 1
        CASE 4: REM Home run
          OnBase = 0
-         R = 2
+         R1 = 2
        END SELECT
    
     CASE 2: REM Runner on 2nd
@@ -95,27 +95,27 @@ SUB Advance (hit)
          OnBase = 23
        CASE 3: REM Triple
          OnBase = 3
-         R = 1
+         R1 = 1
        CASE 4: REM Home run
          OnBase = 0
-         R = 2
+         R1 = 2
        END SELECT
 
     CASE 3: REM Runner on 3rd
       SELECT CASE hit
        CASE 0: REM Bunt
          OnBase = 0
-         R = 1
+         R1 = 1
        CASE 1: REM Single
          OnBase = 13
        CASE 2: REM Double
          OnBase = 23
        CASE 3: REM Triple
          OnBase = 3
-         R = 1
+         R1 = 1
        CASE 4: REM Home run
          OnBase = 0
-         R = 2
+         R1 = 2
        END SELECT
    
     CASE 12: REM Runners on 1st & 2nd
@@ -124,74 +124,77 @@ SUB Advance (hit)
          OnBase = 23
        CASE 1: REM Single
          OnBase = 123
+         PRINT "Bases Loaded!"
        CASE 2: REM Double
          OnBase = 23
-         R = 1
+         R1 = 1
        CASE 3: REM Triple
          OnBase = 3
-         R = 2
+         R1 = 2
        CASE 4: REM Home run
          OnBase = 0
-         R = 3
+         R1 = 3
        END SELECT
 
     CASE 13: REM Runners on 1st & 3rd
       SELECT CASE hit
        CASE 0: REM Bunt
          OnBase = 2
-         R = 1
+         R1 = 1
        CASE 1: REM Single
          OnBase = 123
+         PRINT "Bases loaded!"
        CASE 2: REM Double
          OnBase = 23
-         R = 1
+         R1 = 1
        CASE 3: REM Triple
          OnBase = 3
-         R = 2
+         R1 = 2
        CASE 4: REM Home run
          OnBase = 0
-         R = 3
+         R1 = 3
        END SELECT
 
     CASE 23: REM Runners on 2nd & 3rd
       SELECT CASE hit
        CASE 0: REM Bunt
          OnBase = 3
-         R = 1
+         R1 = 1
        CASE 1: REM Single
          OnBase = 123
+         PRINT "Bases loaded!"
        CASE 2: REM Double
          OnBase = 23
-         R = 1
+         R1 = 1
        CASE 3: REM Triple
          OnBase = 3
-         R = 2
+         R1 = 2
        CASE 4: REM Home run
          OnBase = 0
-         R = 3
+         R1 = 3
        END SELECT
 
     CASE 123: REM Bases loaded!
       SELECT CASE hit
        CASE 0: REM Bunt
          OnBase = 23
-         R = 1
+         R1 = 1
        CASE 1: REM Single
          OnBase = 123
-         R = 1
+         R1 = 1
        CASE 2: REM Double
          OnBase = 123
-         R = 2
+         R1 = 2
        CASE 3: REM Triple
          OnBase = 3
-         R = 3
+         R1 = 3
        CASE 4: REM Home run
          OnBase = 0
-         R = 4
+         R1 = 4
        END SELECT
 
   END SELECT
-  CALL AddRun(R)
+  CALL AddRun(R1)
 END SUB
 
 SUB After
@@ -298,15 +301,18 @@ REM Play ball depending on 2d6 roll
   SELECT CASE R
     CASE 11, 16, 26
       REM Single
+      PRINT "Aaannd... it's a hit!"
       H(Frame) = H(Frame) + 1
       CALL Advance(1)
     CASE 12: REM Sacrifice bunt
       Advance (0): REM 0 is special for bunt
       Outs = Outs + 1
     CASE 13, 14, 15, 23, 24, 25, 35, 36, 45, 46
+      PRINT "No dice. The batter's out."
       REM Fly Out, Pop Out, Ground Out etc.
       Outs = Outs + 1
     CASE 22: REM Double
+      PRINT "Batter hits a double!"
       H(Frame) = H(Frame) + 1
       CALL Advance(2)
     CASE 33: REM Triple
@@ -317,12 +323,17 @@ REM Play ball depending on 2d6 roll
     CASE 44: REM Walk
       CALL Advance(1)
     CASE 55: REM Reach On Error
-      E(Frame) = E(Frame) + 1
+      IF Frame = TOP THEN
+        E(BOTTOM) = E(BOTTOM) + 1
+      ELSE
+        E(TOP) = E(TOP) + 1
+      END IF
       CALL Advance(1)
     CASE 56: REM Sacrifice fly
       CALL Advance(1)
       Outs = Outs + 1
     CASE 66: REM Home run
+      PRINT "The batter swings for the fences... and it's gone! HOME RUN!"
       H(Frame) = H(Frame) + 1
       CALL Advance(4)
     CASE ELSE
@@ -340,7 +351,7 @@ FUNCTION Roll%
     d1 = d2
     d2 = T
   END IF
-  Roll = VAL(STR$(d1) + STR$(d2))
+  Roll = d1 * 10 + d2
 END FUNCTION
 
 DEFINT A-Z
